@@ -1,0 +1,33 @@
+module.exports = {
+  env: {
+    browser: true,
+    commonjs: true,
+    es2021: true,
+    node: true,
+  },
+  extends: ["google", "plugin:prettier/recommended"],
+  plugins: ["prettier"],
+  overrides: [],
+  parserOptions: {
+    ecmaVersion: "latest",
+  },
+  rules: {
+    "new-cap": "off",
+    "require-jsdoc": "off",
+    camelcase: "off",
+    "prettier/prettier": ["error", { endOfLine: "auto" }],
+    "import/prefer-default-export": "off",
+    "no-underscore-dangle": "off",
+    "no-eval": "off",
+    "no-restricted-globals": "off",
+    "chai-friendly/no-unused-expressions": "off",
+    "no-plusplus": "warn",
+    "arrow-body-style": "off",
+    strict: "off",
+    camelcase: "off",
+    "consistent-return": "off",
+    "no-unused-vars": "warn",
+    radix: "off",
+    "no-param-reassign": "off",
+  },
+};
