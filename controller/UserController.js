@@ -1,22 +1,24 @@
 const { apiResponse } = require("../lib/ResponseController");
 const logger = require("../lib/logger");
 const dataToSnakeCase = require("../lib/data_to_snake_case");
-// const {
-//   SubscriberModel,
-//   TransactionModel,
-//   sequelize,
-// } = require('../../init/mysql-init')
+const { UserModel } = require("../init/mysql-init");
 
 const UserController = {};
 
 UserController.get = async (req, res) => {
   logger.info("Entering - create user");
   try {
+    const users = await UserModel.findAll({
+      raw: true,
+      attributes: { exclude: ["password", "id"] },
+    });
+
     res.send(
       dataToSnakeCase(
         apiResponse({
           statusCode: 200,
           message: "sucessful",
+          data: users,
         })
       )
     );

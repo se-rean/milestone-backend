@@ -2,6 +2,9 @@ require("dotenv").config();
 const Sequelize = require("sequelize");
 const logger = require("../lib/logger");
 const UserModel = require("../model/UserModel");
+const CompanyModel = require("../model/CompanyModel");
+const SitesModel = require("../model/SitesModel");
+
 const DEFAULT_TIMEZONE = "+08:00";
 
 const sequelize = new Sequelize(
@@ -26,6 +29,8 @@ const sequelize = new Sequelize(
 
 const models = {
   UserModel: UserModel.init(sequelize, Sequelize),
+  CompanyModel: CompanyModel.init(sequelize, Sequelize),
+  SitesModel: SitesModel.init(sequelize, Sequelize),
 };
 
 /** Create relationship in ORM */
