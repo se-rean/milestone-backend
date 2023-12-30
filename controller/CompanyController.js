@@ -9,15 +9,16 @@ const CompanyController = {};
 CompanyController.post = async (req, res) => {
   logger.info("Entering - create company");
 
-  const { sites, company_name, address } = req.body;
+  const { sites, company_name, file_upload, address } = req.body;
   const transaction = await sequelize.transaction();
 
   try {
     const subscriberId = regcodeWrapper();
     const company = await CompanyModel.create({
       company_id: subscriberId,
-      company_name: company_name,
-      address: address,
+      company_name,
+      address,
+      file_upload,
     });
 
     if (sites) {

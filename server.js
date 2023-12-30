@@ -13,6 +13,19 @@ app.use(bodyParser.urlencoded({ extended: true }));
 app.use(express.json());
 app.use(cors());
 app.use(express.urlencoded({ extended: true }));
+
+app.use((req, res, next) => {
+  const ipAddress =
+    req.headers["x-forwarded-for"] ||
+    req.connection.remoteAddress ||
+    req.socket.remoteAddress ||
+    req.connection.socket.remoteAddress;
+
+  if (!ipAddress) return res.send("invalid Ip address");
+  console.table(`Your IP address is ${ipAddress}`);
+  next();
+});
+
 app.use(
   rTracer.expressMiddleware({
     requestIdFactory: (req) => {

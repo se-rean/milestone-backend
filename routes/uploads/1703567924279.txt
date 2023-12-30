@@ -1,0 +1,15 @@
+mpp - malaysian -old  mobile platform
+uce -new mpp - uni charging engine
+
+
+cbas-api gateway/uce
+cbas data-
+
+data-subscriber info, 
+
+MSISDN=mobilenumber & IMSI=simcard-id
+rates=charging
+
+store
+account=wallet
+offer=

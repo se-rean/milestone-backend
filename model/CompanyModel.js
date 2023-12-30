@@ -13,6 +13,7 @@ class CompanyModel extends Sequelize.Model {
         company_id: DataTypes.STRING(45),
         company_name: DataTypes.STRING(45),
         address: DataTypes.STRING(255),
+        file_upload: DataTypes.STRING(255),
       },
       {
         modelName: "CompanyModel",
