@@ -23,6 +23,7 @@ app.use((req, res, next) => {
 
   if (!ipAddress) return res.send("invalid Ip address");
   console.table(`Your IP address is ${ipAddress}`);
+  req.body.ip = ipAddress;
   next();
 });
 

@@ -23,10 +23,9 @@ CompanyController.post = async (req, res) => {
 
     if (sites) {
       sites.forEach((element) => {
-        delete element.id
+        delete element.id;
         element.company_id = subscriberId;
       });
-      console.log(sites)
       await SitesModel.bulkCreate(sites, { transaction });
     }
 

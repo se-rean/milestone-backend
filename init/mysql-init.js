@@ -5,6 +5,7 @@ const UserModel = require("../model/UserModel");
 const CompanyModel = require("../model/CompanyModel");
 const SitesModel = require("../model/SitesModel");
 const RoleModel = require("../model/RoleModel");
+const LogModel = require("../model/LogModel");
 
 const DEFAULT_TIMEZONE = "+08:00";
 
@@ -33,6 +34,7 @@ const models = {
   CompanyModel: CompanyModel.init(sequelize, Sequelize),
   SitesModel: SitesModel.init(sequelize, Sequelize),
   RoleModel: RoleModel.init(sequelize, Sequelize),
+  LogModel: LogModel.init(sequelize, Sequelize),
 };
 
 /** Create relationship in ORM */
