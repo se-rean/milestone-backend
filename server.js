@@ -7,7 +7,7 @@ const app = express();
 const routes = require("./routes/index");
 const rTracer = require("cls-rtracer");
 const cors = require("cors");
-
+require("./init/mongoose-init");
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(express.json());
