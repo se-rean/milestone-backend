@@ -2,33 +2,45 @@ const { apiResponse } = require("../lib/ResponseController");
 const logger = require("../lib/logger");
 const dataToSnakeCase = require("../lib/data_to_snake_case");
 const regcodeWrapper = require("../lib/regcode-generator-wrapper");
-const { CompanyModel, SitesModel, sequelize } = require("../init/mysql-init");
+const { CompanyModel, SitesModel, DivisionModel, sequelize } = require("../init/mysql-init");
 
 const CompanyController = {};
 
 CompanyController.post = async (req, res) => {
   logger.info("Entering - create company");
-
-  const { sites, company_name, file_upload, address } = req.body;
+  console.log(req.body);
+  const {
+    siteFieldData,
+    companyFieldData,
+    organizationChart,
+    divisionFieldData,
+    company_file,
+    selectedCheckboxes,
+  } = req.body;
   const transaction = await sequelize.transaction();
 
   try {
     const subscriberId = regcodeWrapper();
-    const company = await CompanyModel.create({
-      company_id: subscriberId,
-      company_name,
-      address,
-      file_upload,
+    companyFieldData.company_id = subscriberId;
+    const company = await CompanyModel.create(companyFieldData, {
+      transaction,
     });
 
-    if (sites) {
-      sites.forEach((element) => {
+    if (siteFieldData) {
+      siteFieldData.forEach((element) => {
         delete element.id;
         element.company_id = subscriberId;
       });
-      await SitesModel.bulkCreate(sites, { transaction });
+      await SitesModel.bulkCreate(siteFieldData, { transaction });
     }
 
+    if (divisionFieldData) {
+      divisionFieldData.forEach((element) => {
+        delete element.id;
+        element.company_id = subscriberId;
+      });
+      await DivisionModel.bulkCreate(divisionFieldData, { transaction });
+    }
     await company.save({ transaction });
     await transaction.commit();
 
@@ -146,7 +158,12 @@ CompanyController.get = async (req, res) => {
         raw: true,
       });
 
-      return { ...item, sites };
+      const division = await DivisionModel.findAll({
+        where: { company_id: item.company_id },
+        raw: true,
+      });
+
+      return { ...item, sites, division };
     });
 
     company.rows = await Promise.all(promises);

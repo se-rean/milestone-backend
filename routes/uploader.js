@@ -10,7 +10,7 @@ router.post("/upload", (req, res) => {
   const form = new formidable.IncomingForm();
   const docType = req.query.docType;
   const uploadDir = path.join(__dirname, `uploads/${docType}`);
-
+  console.log(docType);
   if (!fs.existsSync(uploadDir)) {
     fs.mkdirSync(uploadDir, { recursive: true });
   }
