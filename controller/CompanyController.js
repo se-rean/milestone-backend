@@ -117,6 +117,49 @@ CompanyController.delete = async (req, res) => {
   }
 };
 
+CompanyController.update = async (req, res) => {
+  logger.info("Entering - update company");
+
+  const { company_id } = req.query;
+  const { companyFieldData } = req.body;
+  const transaction = await sequelize.transaction();
+
+  try {
+    console.log(companyFieldData);
+    const result = await CompanyModel.update(companyFieldData, {
+      where: {
+        company_id,
+      },
+      transaction,
+    });
+
+    if (result == 0) throw new Error("No data updated");
+    await transaction.commit();
+    res.send(
+      dataToSnakeCase(
+        apiResponse({
+          statusCode: 200,
+          message: "sucessful",
+          data: result,
+        })
+      )
+    );
+  } catch (error) {
+    await transaction.rollback();
+    logger.error(`Error on - create company - ${error}`);
+    res.send(
+      dataToSnakeCase(
+        apiResponse({
+          isSuccess: false,
+          statusCode: 402,
+          message: error.message,
+          errors: "failed",
+        })
+      )
+    );
+  }
+};
+
 CompanyController.get = async (req, res) => {
   logger.info("Entering - create company");
   try {
