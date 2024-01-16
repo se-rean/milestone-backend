@@ -4,18 +4,19 @@ class SitesModel extends Sequelize.Model {
   static init(sequelize, DataTypes) {
     return super.init(
       {
-        company_id: DataTypes.STRING(255),
-        contact_person: DataTypes.STRING(255),
         site_address: DataTypes.STRING(255),
-        phone: DataTypes.STRING(255),
-        position: DataTypes.STRING(255),
-        structure: DataTypes.STRING(255),
-        certification: DataTypes.STRING(255),
-        goal: DataTypes.STRING(255),
+        country: DataTypes.STRING(255),
+        site_state: DataTypes.STRING(255),
+        site_suburb: DataTypes.STRING(255),
+        site_contact_person: DataTypes.STRING(255),
+        site_person_mobile: DataTypes.STRING(255),
+        site_person_email: DataTypes.STRING(255),
+        site_status: DataTypes.STRING(255),
+        company_id: DataTypes.STRING(255),
       },
       {
         modelName: "SitesModel",
-        tableName: "sites",
+        tableName: "site_v2",
         sequelize,
         timestamps: true,
       }

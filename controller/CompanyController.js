@@ -2,33 +2,45 @@ const { apiResponse } = require("../lib/ResponseController");
 const logger = require("../lib/logger");
 const dataToSnakeCase = require("../lib/data_to_snake_case");
 const regcodeWrapper = require("../lib/regcode-generator-wrapper");
-const { CompanyModel, SitesModel, sequelize } = require("../init/mysql-init");
+const { CompanyModel, SitesModel, DivisionModel, sequelize } = require("../init/mysql-init");
 
 const CompanyController = {};
 
 CompanyController.post = async (req, res) => {
   logger.info("Entering - create company");
-
-  const { sites, company_name, file_upload, address } = req.body;
+  console.log(req.body);
+  const {
+    siteFieldData,
+    companyFieldData,
+    organizationChart,
+    divisionFieldData,
+    company_file,
+    selectedCheckboxes,
+  } = req.body;
   const transaction = await sequelize.transaction();
 
   try {
     const subscriberId = regcodeWrapper();
-    const company = await CompanyModel.create({
-      company_id: subscriberId,
-      company_name,
-      address,
-      file_upload,
+    companyFieldData.company_id = subscriberId;
+    const company = await CompanyModel.create(companyFieldData, {
+      transaction,
     });
 
-    if (sites) {
-      sites.forEach((element) => {
+    if (siteFieldData) {
+      siteFieldData.forEach((element) => {
         delete element.id;
         element.company_id = subscriberId;
       });
-      await SitesModel.bulkCreate(sites, { transaction });
+      await SitesModel.bulkCreate(siteFieldData, { transaction });
     }
 
+    if (divisionFieldData) {
+      divisionFieldData.forEach((element) => {
+        delete element.id;
+        element.company_id = subscriberId;
+      });
+      await DivisionModel.bulkCreate(divisionFieldData, { transaction });
+    }
     await company.save({ transaction });
     await transaction.commit();
 
@@ -105,6 +117,49 @@ CompanyController.delete = async (req, res) => {
   }
 };
 
+CompanyController.update = async (req, res) => {
+  logger.info("Entering - update company");
+
+  const { company_id } = req.query;
+  const { companyFieldData } = req.body;
+  const transaction = await sequelize.transaction();
+
+  try {
+    console.log(companyFieldData);
+    const result = await CompanyModel.update(companyFieldData, {
+      where: {
+        company_id,
+      },
+      transaction,
+    });
+
+    if (result == 0) throw new Error("No data updated");
+    await transaction.commit();
+    res.send(
+      dataToSnakeCase(
+        apiResponse({
+          statusCode: 200,
+          message: "sucessful",
+          data: result,
+        })
+      )
+    );
+  } catch (error) {
+    await transaction.rollback();
+    logger.error(`Error on - create company - ${error}`);
+    res.send(
+      dataToSnakeCase(
+        apiResponse({
+          isSuccess: false,
+          statusCode: 402,
+          message: error.message,
+          errors: "failed",
+        })
+      )
+    );
+  }
+};
+
 CompanyController.get = async (req, res) => {
   logger.info("Entering - create company");
   try {
@@ -146,7 +201,12 @@ CompanyController.get = async (req, res) => {
         raw: true,
       });
 
-      return { ...item, sites };
+      const division = await DivisionModel.findAll({
+        where: { company_id: item.company_id },
+        raw: true,
+      });
+
+      return { ...item, sites, division };
     });
 
     company.rows = await Promise.all(promises);

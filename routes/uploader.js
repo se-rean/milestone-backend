@@ -8,7 +8,14 @@ const path = require("path");
 
 router.post("/upload", (req, res) => {
   const form = new formidable.IncomingForm();
-  form.uploadDir = path.join(__dirname, "uploads");
+  const docType = req.query.docType;
+  const uploadDir = path.join(__dirname, `uploads/${docType}`);
+  console.log(docType);
+  if (!fs.existsSync(uploadDir)) {
+    fs.mkdirSync(uploadDir, { recursive: true });
+  }
+
+  form.uploadDir = uploadDir;
 
   form.parse(req, (err, fields, files) => {
     console.log("Files:", files);
@@ -35,7 +42,7 @@ router.post("/upload", (req, res) => {
     const newFilename = `${Date.now()}.${fileExtension[1]}`;
     uploadedFile.newFilename = newFilename;
 
-    const newPath = path.join(__dirname, "uploads", newFilename);
+    const newPath = path.join(__dirname, `uploads/${docType}`, newFilename);
 
     const readStream = fs.createReadStream(oldPath);
     const writeStream = fs.createWriteStream(newPath);
@@ -62,7 +69,8 @@ router.post("/upload", (req, res) => {
 
 router.get("/read/:filename", (req, res) => {
   const filename = req.params.filename;
-  const filePath = path.join(__dirname, "uploads", filename);
+  const docType = req.query.docType;
+  const filePath = path.join(__dirname, `uploads/${docType}`, filename);
 
   // Check if the file exists
   if (fs.existsSync(filePath)) {
@@ -76,7 +84,8 @@ router.get("/read/:filename", (req, res) => {
 
 router.get("/download/:filename", (req, res) => {
   const filename = req.params.filename;
-  const filePath = path.join(__dirname, "uploads", filename);
+  const docType = req.query.docType;
+  const filePath = path.join(__dirname, `uploads/${docType}`, filename);
 
   // Check if the file exists
   if (fs.existsSync(filePath)) {

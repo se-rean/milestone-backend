@@ -142,7 +142,7 @@ UserController.delete = async (req, res) => {
 };
 
 UserController.getRole = async (req, res) => {
-  logger.info("Entering - create user");
+  logger.info("Entering - Get user role");
   try {
     const roles = await RoleModel.findAll({
       raw: true,
