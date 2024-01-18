@@ -20,6 +20,7 @@ class UserModel extends Sequelize.Model {
         suburb: DataTypes.STRING(45),
         expiration_date: DataTypes.STRING(45),
         MFA: DataTypes.STRING(45),
+        company_id: DataTypes.STRING(45),
       },
       {
         modelName: "user",

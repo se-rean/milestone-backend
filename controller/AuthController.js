@@ -2,7 +2,7 @@ const { apiResponse } = require("../lib/ResponseController");
 const logger = require("../lib/logger");
 const dataToSnakeCase = require("../lib/data_to_snake_case");
 const AuthController = {};
-const { UserModel, LogModel } = require("../init/mysql-init");
+const { UserModel, LogModel, CompanyModel } = require("../init/mysql-init");
 const jwt = require("jsonwebtoken");
 
 const generateAccessToken = (user) => {
@@ -18,16 +18,55 @@ const generateRefreshToken = (user) => {
 };
 
 AuthController.login = async (req, res) => {
-  const { username, password, ip } = req.body;
-
+  const { username, password, ip, userType } = req.body;
+  console.log(userType);
   try {
-    const user = await UserModel.findOne({
-      where: {
-        username,
-        password,
-      },
-      attributes: { exclude: ["password"] },
-    });
+    if (
+      ![
+        "application_owner",
+        "system_owner",
+        "privileged_user",
+        "operations_user",
+        "authorising officer",
+        "auditor",
+        "consultant",
+        "guest",
+        "end_user",
+      ].includes(userType)
+    )
+      throw new Error("User type required");
+
+    let user = {};
+
+    switch (userType) {
+      case "application_owner":
+        user = await UserModel.findOne({
+          where: {
+            username,
+            password,
+          },
+          attributes: { exclude: ["password"] },
+        });
+        break;
+      case "system_owner":
+        user = await CompanyModel.findOne({
+          where: {
+            username,
+            password,
+          },
+          attributes: { exclude: ["password"] },
+        });
+        break;
+      case "privileged_user":
+        user = await UserModel.findOne({
+          where: {
+            username,
+            password,
+          },
+          attributes: { exclude: ["password"] },
+        });
+        break;
+    }
 
     if (!user) {
       logger.info(`Login failed for username: ${username}`);

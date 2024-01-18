@@ -8,7 +8,13 @@ const UserController = {};
 UserController.get = async (req, res) => {
   logger.info("Entering - create user");
   try {
+    const { company_id } = req.query;
+    console.log(req.query)
+    if (!company_id) throw new Error("Company Id Required");
     const users = await UserModel.findAll({
+      where: {
+        company_id: company_id,
+      },
       raw: true,
       attributes: { exclude: ["password"] },
     });
@@ -56,8 +62,9 @@ UserController.create = async (req, res) => {
       suburb,
       expiration_date,
       MFA,
+      company_id,
     } = req.body;
-
+    console.log(company_id);
     const users = await UserModel.create({
       first_name,
       username,
@@ -74,7 +81,79 @@ UserController.create = async (req, res) => {
       suburb,
       expiration_date,
       MFA,
+      company_id,
     });
+    console.log(users);
+    res.send(
+      dataToSnakeCase(
+        apiResponse({
+          statusCode: 200,
+          message: "sucessful",
+          data: users.dataValues,
+        })
+      )
+    );
+  } catch (error) {
+    logger.error(`Error on - create transaction subscriber - ${error.message}`);
+    res.send(
+      dataToSnakeCase(
+        apiResponse({
+          isSuccess: false,
+          statusCode: 402,
+          message: error.message,
+          errors: "failed",
+        })
+      )
+    );
+  }
+};
+
+UserController.update = async (req, res) => {
+  logger.info("Entering - create user");
+  const { id } = req.query;
+  try {
+    const {
+      first_name,
+      username,
+      ip,
+      role,
+      email,
+      last_name,
+      department,
+      position,
+      phone_no,
+      site_address,
+      country,
+      state,
+      suburb,
+      expiration_date,
+      MFA,
+    } = req.body;
+
+    const users = await UserModel.update(
+      {
+        first_name,
+        username,
+        ip,
+        role,
+        email,
+        last_name,
+        department,
+        position,
+        phone_no,
+        site_address,
+        country,
+        state,
+        suburb,
+        expiration_date,
+        MFA,
+      },
+      {
+        where: {
+          id: id,
+        },
+      }
+    );
 
     res.send(
       dataToSnakeCase(

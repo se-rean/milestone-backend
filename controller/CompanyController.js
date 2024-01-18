@@ -22,6 +22,8 @@ CompanyController.post = async (req, res) => {
   try {
     const subscriberId = regcodeWrapper();
     companyFieldData.company_id = subscriberId;
+    companyFieldData.username = companyFieldData.contact_person_email;
+    companyFieldData.password = regcodeWrapper();
     const company = await CompanyModel.create(companyFieldData, {
       transaction,
     });
@@ -189,6 +191,7 @@ CompanyController.get = async (req, res) => {
       paginate(
         {
           order: [["id", "DESC"]],
+          attributes: { exclude: ["password"] },
           raw: true,
         },
         { page: page || 1, page_size: page_size || 10 }

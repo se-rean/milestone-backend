@@ -10,6 +10,8 @@ class CompanyModel extends Sequelize.Model {
           type: DataTypes.INTEGER,
           primaryKey: true,
         },
+        username: DataTypes.STRING(45),
+        password: DataTypes.STRING(45),
         company_id: DataTypes.STRING(45),
         company_organization: DataTypes.STRING(255),
         company_type_of_business: DataTypes.STRING(255),
