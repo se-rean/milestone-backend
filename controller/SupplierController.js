@@ -1,16 +1,20 @@
 const { apiResponse } = require("../lib/ResponseController");
 const logger = require("../lib/logger");
 const dataToSnakeCase = require("../lib/data_to_snake_case");
-const SupplierModel = require("../model/mongo-model/supplier");
+const {
+  SupplierModel,
+  RoleModel,
+  DivisionModel,
+  sequelize,
+  UserModel,
+} = require("../init/mysql-init");
 const SupplierController = {};
 
 SupplierController.post = async (req, res) => {
   try {
     const { supplier } = req.body;
-    const supplierData = {
-      data: supplier,
-    };
-    const result = await SupplierModel.create(supplierData);
+
+    const result = await SupplierModel.create(supplier);
     result.data = result.toJSON();
     console.log(result);
     res.send(
@@ -72,7 +76,7 @@ SupplierController.post = async (req, res) => {
 SupplierController.getById = async (req, res) => {
   const supplierId = req.params.id;
   try {
-    const supplier = await SupplierModel.findById(supplierId);
+    const supplier = await SupplierModel.findAll({ where: { id: supplierId } });
     if (!supplier) {
       return res.status(404).json({ error: "Supplier not found" });
     }
@@ -102,12 +106,36 @@ SupplierController.getById = async (req, res) => {
 
 SupplierController.get = async (req, res) => {
   try {
-    const supplier = await SupplierModel.find();
+    const { companyId } = req.query;
+    console.log("companyId", companyId);
+    if (!companyId) {
+      return res.status(404).json({ error: "Company Id not found" });
+    }
+
+    const supplier = await SupplierModel.findAll({
+      where: {
+        companyId: companyId,
+      },
+    });
     console.log(supplier);
     if (!supplier) {
       return res.status(404).json({ error: "Supplier not found" });
     }
 
+    const supplierOwner = await UserModel.findAll({
+      where: {
+        company_id: companyId,
+      },
+      raw: true,
+    });
+
+    supplier.forEach((item) => {
+      supplierOwner.forEach((div) => {
+        if (div.id == item.supplierOwner) {
+          item.supplierOwner = div.first_name + " " + div.last_name;
+        }
+      });
+    });
     res.send(
       // dataToSnakeCase(
       apiResponse({
@@ -134,7 +162,7 @@ SupplierController.get = async (req, res) => {
 SupplierController.delete = async (req, res) => {
   const { id } = req.query;
   try {
-    const supplier = await SupplierModel.findByIdAndDelete(id);
+    const supplier = await SupplierModel.destroy({ where: { id: id } });
     if (!supplier) {
       return res.status(404).json({ error: "Supplier not found" });
     }
@@ -167,23 +195,19 @@ SupplierController.put = async (req, res) => {
   const updateFields = req.body; // Assuming you send the update fields in the request body
 
   try {
-    const existingSupplier = await SupplierModel.findById(supplierId);
+    console.log(updateFields);
+    const existingSupplier = await SupplierModel.findAll({
+      where: { id: supplierId },
+    });
 
     if (!existingSupplier) {
       return res.status(404).json({ error: "Supplier not found" });
     }
-    console.log(existingSupplier.data);
     // Merge existing data with the updateFields
-    const mergedFields = {
-      ...existingSupplier.data,
-      ...updateFields,
-    };
-    console.log(mergedFields);
-    const updatedSupplier = await SupplierModel.findByIdAndUpdate(
-      supplierId,
-      { $set: { [`data`]: mergedFields } },
-      { new: true }
-    );
+
+    const updatedSupplier = await SupplierModel.update(updateFields, {
+      where: { id: supplierId },
+    });
 
     if (!updatedSupplier) {
       return res.status(404).json({ error: "Supplier not found" });
@@ -195,7 +219,7 @@ SupplierController.put = async (req, res) => {
         apiResponse({
           statusCode: 200,
           message: "sucessful",
-          data: updatedSupplier.toJSON(),
+          data: updatedSupplier,
         })
       )
     );

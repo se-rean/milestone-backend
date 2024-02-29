@@ -77,7 +77,7 @@ AuthController.login = async (req, res) => {
     const refreshToken = generateRefreshToken(user);
 
     const token = { accessToken, refreshToken, expiresIn: "15m" }; // Add expiresIn property
-
+    user.dataValues.role = userType;
     logger.info(`User ${username} logged in successfully`);
     LogModel.create({
       ip: ip,

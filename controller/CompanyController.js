@@ -2,7 +2,12 @@ const { apiResponse } = require("../lib/ResponseController");
 const logger = require("../lib/logger");
 const dataToSnakeCase = require("../lib/data_to_snake_case");
 const regcodeWrapper = require("../lib/regcode-generator-wrapper");
-const { CompanyModel, SitesModel, DivisionModel, sequelize } = require("../init/mysql-init");
+const {
+  CompanyModel,
+  SitesModel,
+  DivisionModel,
+  sequelize,
+} = require("../init/mysql-init");
 
 const CompanyController = {};
 
@@ -58,6 +63,44 @@ CompanyController.post = async (req, res) => {
   } catch (error) {
     await transaction.rollback();
     logger.error(`Error on - create company - ${error}`);
+    res.send(
+      dataToSnakeCase(
+        apiResponse({
+          isSuccess: false,
+          statusCode: 402,
+          message: error.message,
+          errors: "failed",
+        })
+      )
+    );
+  }
+};
+
+CompanyController.getDivision = async (req, res) => {
+  logger.info("Entering - getDivision ");
+  try {
+    const { company_id } = req.query;
+    console.log(req.query);
+    if (!company_id) throw new Error("Company Id Required");
+    const users = await DivisionModel.findAll({
+      where: {
+        company_id: company_id,
+      },
+      raw: true,
+      attributes: { exclude: ["password"] },
+    });
+
+    res.send(
+      dataToSnakeCase(
+        apiResponse({
+          statusCode: 200,
+          message: "sucessful",
+          data: users,
+        })
+      )
+    );
+  } catch (error) {
+    logger.error(`Error on - create transaction subscriber - ${error.message}`);
     res.send(
       dataToSnakeCase(
         apiResponse({
@@ -168,7 +211,7 @@ CompanyController.get = async (req, res) => {
     // CompanyModel.hasMany(SitesModel, { foreignKey: "company_id", as: "sites" });
     // SitesModel.belongsTo(CompanyModel, { foreignKey: "company_id" });
 
-    const { page, page_size } = req.query;
+    const { page, page_size, companyId } = req.query;
     const paginate = (
       query,
       { page: _page = DEFAULT_PAGE, page_size: _page_size = DEFAULT_PAGE_SIZE }
@@ -190,6 +233,7 @@ CompanyController.get = async (req, res) => {
     const company = await CompanyModel.findAndCountAll(
       paginate(
         {
+          where: { company_id: companyId },
           order: [["id", "DESC"]],
           attributes: { exclude: ["password"] },
           raw: true,

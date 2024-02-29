@@ -1,7 +1,12 @@
 const { apiResponse } = require("../lib/ResponseController");
 const logger = require("../lib/logger");
 const dataToSnakeCase = require("../lib/data_to_snake_case");
-const { UserModel, RoleModel, sequelize } = require("../init/mysql-init");
+const {
+  UserModel,
+  RoleModel,
+  DivisionModel,
+  sequelize,
+} = require("../init/mysql-init");
 
 const UserController = {};
 
@@ -9,7 +14,6 @@ UserController.get = async (req, res) => {
   logger.info("Entering - create user");
   try {
     const { company_id } = req.query;
-    console.log(req.query)
     if (!company_id) throw new Error("Company Id Required");
     const users = await UserModel.findAll({
       where: {
@@ -18,6 +22,23 @@ UserController.get = async (req, res) => {
       raw: true,
       attributes: { exclude: ["password"] },
     });
+
+    const division = await DivisionModel.findAll({
+      where: {
+        company_id: company_id,
+      },
+      raw: true,
+    });
+
+    users.forEach((item) => {
+      division.forEach((div) => {
+        if (div.id == item.department) {
+          item.department = div.department_name;
+        }
+      });
+    });
+
+    console.log(users);
 
     res.send(
       dataToSnakeCase(

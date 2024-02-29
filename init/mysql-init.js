@@ -8,6 +8,8 @@ const RoleModel = require("../model/RoleModel");
 const LogModel = require("../model/LogModel");
 const DivisionModel = require("../model/DivisionModel");
 const ThemplateModel = require("../model/ThemplateModel");
+const SupplierModel = require("../model/SupplierModel");
+const CustomerModel = require("../model/CustomerModel");
 
 const DEFAULT_TIMEZONE = "+08:00";
 
@@ -39,6 +41,8 @@ const models = {
   LogModel: LogModel.init(sequelize, Sequelize),
   DivisionModel: DivisionModel.init(sequelize, Sequelize),
   ThemplateModel: ThemplateModel.init(sequelize, Sequelize),
+  SupplierModel: SupplierModel.init(sequelize, Sequelize),
+  CustomerModel: CustomerModel.init(sequelize, Sequelize),
 };
 
 /** Create relationship in ORM */
